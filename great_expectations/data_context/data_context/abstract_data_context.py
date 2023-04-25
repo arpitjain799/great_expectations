@@ -3917,27 +3917,28 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ):  # Iterate over both together
                 for idx, datasource_name in enumerate(datasource_names):
                     datasource = self.get_datasource(datasource_name)
-                    assert not isinstance(
-                        datasource, FluentDatasource
-                    ), 'Method "get_available_data_asset_names" not implemented for FluentDatasource'
-                    data_asset_names[
-                        datasource_name
-                    ] = datasource.get_available_data_asset_names(
-                        batch_kwargs_generator_names[idx]
-                    )
+                    if isinstance(datasource, FluentDatasource):
+                        data_asset_names[datasource_name] = datasource.get_asset_names()
+                    else:
+                        data_asset_names[
+                            datasource_name
+                        ] = datasource.get_available_data_asset_names(
+                            batch_kwargs_generator_names[idx]
+                        )
 
             elif len(batch_kwargs_generator_names) == 1:
                 datasource = self.get_datasource(datasource_names[0])
-                assert not isinstance(
-                    datasource, FluentDatasource
-                ), 'Method "get_available_data_asset_names" not implemented for FluentDatasource'
                 # 20230120 - Chetan - I believe this is a latent bug - we should not be doing string-based indexing
                 #                     within a list. This will result in a runtime error.
-                datasource_names[  # type:ignore[call-overload]
-                    datasource_names[0]
-                ] = datasource.get_available_data_asset_names(
-                    batch_kwargs_generator_names
-                )
+                # type:ignore[call-overload]
+                if isinstance(datasource, FluentDatasource):
+                    data_asset_names[datasource_names[0]] = datasource.get_asset_names()
+                else:
+                    datasource_names[
+                        datasource_names[0]
+                    ] = datasource.get_available_data_asset_names(
+                        batch_kwargs_generator_names
+                    )
 
             else:
                 raise ValueError(
@@ -3948,12 +3949,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             for datasource_name in datasource_names:
                 try:
                     datasource = self.get_datasource(datasource_name)
-                    assert not isinstance(
-                        datasource, FluentDatasource
-                    ), 'Method "get_available_data_asset_names" not implemented for FluentDatasource'
-                    data_asset_names[
-                        datasource_name
-                    ] = datasource.get_available_data_asset_names()
+                    if isinstance(datasource, FluentDatasource):
+                        data_asset_names[datasource_name] = datasource.get_asset_names()
+                    else:
+                        data_asset_names[
+                            datasource_name
+                        ] = datasource.get_available_data_asset_names()
                 except ValueError:
                     # handle the edge case of a non-existent datasource
                     data_asset_names[datasource_name] = {}
